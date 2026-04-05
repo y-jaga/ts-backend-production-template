@@ -1,7 +1,9 @@
-import express, { Application } from 'express'
+import express, { Application, NextFunction, Request, Response } from 'express'
 import path from 'path'
 import router from './router/apiRouter'
 import globalErrorHandler from './middleware/globalErrorHandler'
+import responseMessage from './constant/responseMessage'
+import httpError from './utils/httpError'
 
 const app: Application = express()
 
@@ -12,7 +14,16 @@ app.use(express.static(path.join(__dirname, '../', '/public')))
 //routes
 app.use('/api/v1', router)
 
-//global error handler
+//404 Handler
+app.use((req: Request, _: Response, next: NextFunction) => {
+    try {
+        throw new Error(responseMessage.NOT_FOUND('route'))
+    } catch (err) {
+        httpError(next, err, req, 404)
+    }
+})
+
+//GLOBAL Error Handler
 app.use(globalErrorHandler)
 
 export default app
